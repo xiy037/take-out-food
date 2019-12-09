@@ -1,8 +1,11 @@
-var selectedItems = ["ITEM0013 x 4"];
-var itemArr = listItemDetails(selectedItems);
-var discountedPrice = bestCharge(itemArr);
-var receipt = printReceipt(itemArr, discountedPrice);
-console.log(receipt);
+var selectedItems = ["ITEM0013 x 4", "ITEM0022 x 1"];
+console.log(bestCharge(selectedItems));
+
+function bestCharge(selectedItems) {
+  var itemArr = listItemDetails(selectedItems);
+  var discountedPrice = minPrice(itemArr);
+  return printReceipt(itemArr, discountedPrice);
+}
 
 function listItemDetails(array) {
   return array.map(function (element) {
@@ -26,8 +29,8 @@ function calculateCharge(array) {
 
 function calculateChargeAfterPromotion(num, array) {
   var itemObj = {
-    charge: 0,
-    items: ['ITEM0001', 'ITEM0022'],
+    charge: num,
+    items: loadPromotions()[1].items,
     promotion1: function () {
       return this.charge - ~~(this.charge / 30) * 6;
     },
@@ -41,12 +44,11 @@ function calculateChargeAfterPromotion(num, array) {
       }, 0);
     }
   }
-  itemObj.charge = num;
   var chargeArr = [];
   return chargeArr.concat(itemObj.promotion1(), itemObj.promotion2(array));
 }
 
-function bestCharge(itemArr) {
+function minPrice(itemArr) {
   var charge = calculateCharge(itemArr);
   var promotionPrice = calculateChargeAfterPromotion(charge, itemArr);
   var minPrice = charge;
@@ -69,7 +71,8 @@ function bestCharge(itemArr) {
 function printReceipt(itemArray, priceObj) {
   var receipt = "============= 订餐明细 =============\n";
   for (var i = 0; i < itemArray.length; i++) {
-    receipt += itemArray[i].name + " x " + itemArray[i].count + " = " + itemArray[i].price * itemArray[i].count + "元\n";
+    receipt += itemArray[i].name + " x " + itemArray[i].count 
+             + " = " + itemArray[i].price * itemArray[i].count + "元\n";
   }
   receipt += "-----------------------------------\n"
   if (priceObj.type) {
@@ -122,9 +125,10 @@ function loadPromotions() {
 }
 
 //[done]用户输入的数据,在菜品价目表中找出价格等，每个item以object形式存放, 加入count，结果存为数组
-//[provided]菜品价目列表--loadAllItems()
-//[provided]优惠列表--loadPromotions()
+//[provided]菜品价目列表--loadAllItems()，无需argument，输出数组
+//[done]优惠列表--loadPromotions(),type里面的内容根据id列出具体打折的商品，无需argument，输出数组
 //[done]计算输入item的价格charge数字：calculateCharge，输入是array，输出是number
-//[done]计算优惠：各种优惠价格都算出来放在一个数组promotionPrice，输入有number的总价，array的菜品itemArr(itemArr[i]是object);
-//[done]在promotionPrice中比较优惠价格大小，输出最小的价格以及优惠类型的object--主函数bestCharge
-//[to-do]最后按照格式输出清单
+//[done]计算优惠：各种优惠价格都算出来放在一个数组promotionPrice，输入有number的总价，array的菜品itemArr(itemArr[i]是object);输出的是包含各种优惠价格的数组；
+//[done]在promotionPrice中比较优惠价格大小，函数minPrice，输出最小的价格以及优惠类型的object；
+//[done]按格式指定清单，输入arguments包括菜品array，minPrice中得到的价格obejct，输出字符串；
+//[done]打印清单
