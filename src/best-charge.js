@@ -1,9 +1,11 @@
-var selectedItems = ["ITEM0013 x 4", "ITEM0022 x 1"];
+var selectedItems = ["ITEM0001 x 1", "ITEM0013 x 2", "ITEM0022 x 1"];
 console.log(bestCharge(selectedItems));
 
 function bestCharge(selectedItems) {
   var itemArr = listItemDetails(selectedItems);
-  var discountedPrice = minPrice(itemArr);
+  var charge = calculateCharge(itemArr);
+  var promotionPrice = calculateChargeAfterPromotion(charge, itemArr);
+  var discountedPrice = getMinPrice(promotionPrice, charge);
   return printReceipt(itemArr, discountedPrice);
 }
 
@@ -28,44 +30,35 @@ function calculateCharge(array) {
 }
 
 function calculateChargeAfterPromotion(num, array) {
-  var itemObj = {
-    charge: num,
-    items: loadPromotions()[1].items,
-    promotion1: function () {
-      return this.charge - ~~(this.charge / 30) * 6;
-    },
-    promotion2: function (array) {
-      return array.reduce(function (prev, curr) {
-        var currCharge = curr.price * curr.count;
-        if (itemObj.items.includes(curr.id)) {
-          currCharge = currCharge / 2;
-        }
-        return prev += currCharge;
-      }, 0);
+  var promotion1 = num - Math.floor(num / 30) * 6;
+  var items = loadPromotions()[1].items;
+  var promotion2 = array.reduce(function (prev, curr) {
+    var currCharge = curr.price * curr.count;
+    if (items.includes(curr.id)) {
+      currCharge = currCharge / 2;
     }
-  }
-  var chargeArr = [];
-  return chargeArr.concat(itemObj.promotion1(), itemObj.promotion2(array));
+    return prev += currCharge;
+    }, 0);
+  return [promotion1, promotion2];
 }
 
-function minPrice(itemArr) {
-  var charge = calculateCharge(itemArr);
-  var promotionPrice = calculateChargeAfterPromotion(charge, itemArr);
-  var minPrice = charge;
+function getMinPrice(promotionPrice, charge) {
+  var minPrice;
   var minPromotionType = "";
   var saveMoney = "";
-  promotionPrice.forEach(function (element, index) {
-    if (element < minPrice) {
-      minPrice = element;
-      minPromotionType = loadPromotions()[index].type;
-      saveMoney = charge - minPrice;
-    }
-  });
-  var result = {};
-  result.price = minPrice;
-  result.type = minPromotionType;
-  result.save = saveMoney;
-  return result;
+  if (promotionPrice[0] <= promotionPrice[1]) {
+    minPrice = promotionPrice[0];
+    minPromotionType = loadPromotions()[0].type;
+  } else {
+    minPrice = promotionPrice[1];
+    minPromotionType = loadPromotions()[1].type;
+  }
+  var saveMoney = charge - minPrice;
+  return {
+    price: minPrice,
+    type: minPromotionType,
+    save: saveMoney
+  };
 }
 
 function printReceipt(itemArray, priceObj) {
