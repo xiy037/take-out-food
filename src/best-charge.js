@@ -1,6 +1,3 @@
-var selectedItems = ["ITEM0001 x 1", "ITEM0013 x 2", "ITEM0022 x 1"];
-console.log(bestCharge(selectedItems));
-
 function bestCharge(selectedItems) {
   var itemArr = listItemDetails(selectedItems);
   var charge = calculateCharge(itemArr);
@@ -43,16 +40,16 @@ function calculateChargeAfterPromotion(num, array) {
 }
 
 function getMinPrice(promotionPrice, charge) {
-  var minPrice;
+  var minPrice = charge;
   var minPromotionType = "";
   var saveMoney = "";
-  if (promotionPrice[0] <= promotionPrice[1]) {
+  if (promotionPrice[0] <= promotionPrice[1] && promotionPrice[0] < charge) {
     minPrice = promotionPrice[0];
     minPromotionType = loadPromotions()[0].type;
-  } else {
+  } else if (promotionPrice[0] > promotionPrice[1] && promotionPrice[0] < charge) {
     minPrice = promotionPrice[1];
     minPromotionType = loadPromotions()[1].type;
-  }
+  } 
   var saveMoney = charge - minPrice;
   return {
     price: minPrice,
@@ -69,7 +66,7 @@ function printReceipt(itemArray, priceObj) {
   }
   receipt += "-----------------------------------\n"
   if (priceObj.type) {
-    receipt += "使用优惠：\n" + priceObj.type
+    receipt += "使用优惠:\n" + priceObj.type
       + "，省" + priceObj.save + "元\n"
       + "-----------------------------------\n";
   }
@@ -112,10 +109,12 @@ function loadPromotions() {
       }
     }
     return element;
-  })
-  promotionList[1].type += "(" + discountedItemName + ")";
+  });
+  promotionList[1].type += "(" + discountedItemName.join("，") + ")";
   return promotionList;
 }
+
+module.exports = bestCharge;
 
 //[done]用户输入的数据,在菜品价目表中找出价格等，每个item以object形式存放, 加入count，结果存为数组
   /*输入：
